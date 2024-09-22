@@ -57,6 +57,32 @@ require("lazy").setup({
   { import = "lazyvim.plugins.extras.ui.alpha" },
   { import = "lazyvim.plugins.extras.lang.go" },
   { import = "plugins" },
+  -- Add Codeium plugin
+  {
+    "Exafunction/codeium.vim",
+    event = "BufEnter",
+    config = function()
+      -- Disable default keymaps
+      vim.g.codeium_disable_bindings = 1
+
+      -- Set up custom keymaps
+      vim.keymap.set('i', '<C-g>', function() return vim.fn['codeium#Accept']() end, { expr = true })
+      vim.keymap.set('i', '<c-;>', function() return vim.fn['codeium#CycleCompletions'](1) end, { expr = true })
+      vim.keymap.set('i', '<c-,>', function() return vim.fn['codeium#CycleCompletions'](-1) end, { expr = true })
+      vim.keymap.set('i', '<c-x>', function() return vim.fn['codeium#Clear']() end, { expr = true })
+    end,
+  },
+  {
+    "L3MON4D3/LuaSnip",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    config = function()
+      require("luasnip.loaders.from_lua").load({paths = "~/.config/nvim/snippets/"})
+      require("luasnip").config.setup({
+        history = true,
+        updateevents = "TextChanged,TextChangedI",
+      })
+    end,
+  },
 }, {
   defaults = {
     lazy = false,
@@ -76,6 +102,18 @@ require("lazy").setup({
     },
   },
 })
+
+-- Load snippets from @snippets folder
+local function load_snippets()
+  local snippets_folder = vim.fn.stdpath("config") .. "/@snippets"
+  for _, ft_file in ipairs(vim.fn.glob(snippets_folder .. "/*.lua", 0, 1)) do
+    local ft = vim.fn.fnamemodify(ft_file, ":t:r")
+    require("luasnip.loaders.from_lua").load({paths = ft_file})
+  end
+end
+
+-- Call the function to load snippets
+load_snippets()
 
 -- Custom command for C++ compilation and execution
 vim.api.nvim_create_user_command("CompileAndRunCppWithFiles", function()
@@ -224,3 +262,22 @@ require("catppuccin").setup({
 
 -- Set colorscheme
 vim.cmd.colorscheme("catppuccin")
+
+-- LuaSnip keybindings
+vim.keymap.set({"i", "s"}, "<C-k>", function()
+  if require("luasnip").expand_or_jumpable() then
+    require("luasnip").expand_or_jump()
+  end
+end, {silent = true})
+
+vim.keymap.set({"i", "s"}, "<C-j>", function()
+  if require("luasnip").jumpable(-1) then
+    require("luasnip").jump(-1)
+  end
+end, {silent = true})
+
+vim.keymap.set("i", "<C-l>", function()
+  if require("luasnip").choice_active() then
+    require("luasnip").change_choice(1)
+  end
+end)
