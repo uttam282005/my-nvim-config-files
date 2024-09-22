@@ -76,7 +76,7 @@ require("lazy").setup({
     "L3MON4D3/LuaSnip",
     dependencies = { "rafamadriz/friendly-snippets" },
     config = function()
-      require("luasnip.loaders.from_lua").load({paths = "~/.config/nvim/snippets/"})
+      require("luasnip.loaders.from_lua").load({paths = vim.fn.stdpath("config") .. "/snippets/"})
       require("luasnip").config.setup({
         history = true,
         updateevents = "TextChanged,TextChangedI",
@@ -105,9 +105,11 @@ require("lazy").setup({
 
 -- Load snippets from @snippets folder
 local function load_snippets()
-  local snippets_folder = vim.fn.stdpath("config") .. "/@snippets"
+  local snippets_folder = vim.fn.stdpath("config") .. "/snippets"
+  print("Snippets folder: " .. snippets_folder)
   for _, ft_file in ipairs(vim.fn.glob(snippets_folder .. "/*.lua", 0, 1)) do
     local ft = vim.fn.fnamemodify(ft_file, ":t:r")
+    print("Loading snippets for filetype: " .. ft)
     require("luasnip.loaders.from_lua").load({paths = ft_file})
   end
 end

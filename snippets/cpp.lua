@@ -1,4 +1,4 @@
-local ls = require("luasnip")
+local ls = require("luasnip"); print("Loading C++ snippets")
 local s = ls.snippet
 local t = ls.text_node
 local i = ls.insert_node
